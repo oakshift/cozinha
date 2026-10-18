@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8A4B1F">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<!-- Only GitHub (data) can be reached; fonts from Google. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src https://api.github.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Cozinha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+:root{
+  --bg:#F3EEE8; --surface:#FFFFFF; --surface-2:#F8F4EF; --line:#E0D6CB;
+  --ink:#2A211B; --muted:#6E5E52; --accent:#8A4B1F; --accent-ink:#FFFFFF;
+  --accent-soft:#F1DFD0; --amber:#9A6500; --amber-soft:#F7E8C8;
+  --danger:#A63A2B; --danger-soft:#F4DDD8; --good:#2F6B3A; --good-soft:#DDEEDF;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#16120F; --surface:#1F1915; --surface-2:#271F1A; --line:#3A2F27;
+    --ink:#EDE4DC; --muted:#B3A395; --accent:#E3A16E; --accent-ink:#1A0F07;
+    --accent-soft:#3A2618; --amber:#E3B04A; --amber-soft:#3A2D14;
+    --danger:#E5826F; --danger-soft:#3C211C; --good:#8CCB97; --good-soft:#1E3322;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#16120F; --surface:#1F1915; --surface-2:#271F1A; --line:#3A2F27;
+  --ink:#EDE4DC; --muted:#B3A395; --accent:#E3A16E; --accent-ink:#1A0F07;
+  --accent-soft:#3A2618; --amber:#E3B04A; --amber-soft:#3A2D14;
+  --danger:#E5826F; --danger-soft:#3C211C; --good:#8CCB97; --good-soft:#1E3322;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);padding-inline:16px;padding-block:env(safe-area-inset-top,0px) calc(48px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:760px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:1.75rem;letter-spacing:-.01em}
+h2{font-size:1.25rem}
+h3{font-size:1.05rem}
+p{margin:0}
+a{color:var(--accent)}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+.label{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding-block:20px 12px}
+#status{font-size:.8rem;padding:2px 10px;border-radius:99px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+#status.ok{background:var(--good-soft);color:var(--good);border-color:transparent}
+#status.bad{background:var(--danger-soft);color:var(--danger);border-color:transparent}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:4px;background:var(--bg);padding-block:8px;border-bottom:1px solid var(--line);margin-bottom:20px}
+nav.tabs button{flex:1 1 auto;min-width:0;font:700 .85rem var(--body);padding:10px 4px;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+nav.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+nav.tabs .n{font-size:.7rem;opacity:.85}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section.tab{display:grid;gap:24px}
+.block{display:grid;gap:10px}
+.block-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.list{display:grid;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.row{display:flex;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid var(--line);flex-wrap:wrap}
+.row:first-child{border-top:0}
+.row .grow{flex:1 1 10rem;min-width:0;overflow-wrap:anywhere;display:grid;gap:3px}
+.row .title{font-weight:700}
+.empty{padding:16px;color:var(--muted)}
+.chip{display:inline-block;font-size:.75rem;font-weight:700;padding:1px 8px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.late{background:var(--danger-soft);color:var(--danger);border-color:transparent}
+.chip.soon{background:var(--amber-soft);color:var(--amber);border-color:transparent}
+.chip.good{background:var(--good-soft);color:var(--good);border-color:transparent}
+.meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.row-actions{display:flex;gap:2px;flex:none}
+details.more > summary{cursor:pointer;font-weight:700;color:var(--muted);padding:4px 0;list-style-position:inside}
+details.more[open] > summary{margin-bottom:10px}
+form.f{display:grid;gap:12px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+label.fl{display:grid;gap:4px;font-size:.85rem;font-weight:700;color:var(--muted)}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:72px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button.btn{font:700 .9rem var(--body);padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.btn.danger{color:var(--danger)}
+button.btn[data-armed]{background:var(--danger);color:#fff;border-color:var(--danger)}
+button.x{border:0;background:none;color:var(--muted);cursor:pointer;font:700 .8rem var(--body);padding:6px 8px;border-radius:6px}
+button.x:hover{background:var(--surface-2);color:var(--ink)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
+.seg button{border:0;border-left:1px solid var(--line);background:var(--surface);color:var(--muted);font:700 .78rem var(--body);padding:7px 9px;cursor:pointer}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"][data-n="2"]{background:var(--good-soft);color:var(--good)}
+.seg button[aria-pressed="true"][data-n="1"]{background:var(--amber-soft);color:var(--amber)}
+.seg button[aria-pressed="true"][data-n="0"]{background:var(--danger-soft);color:var(--danger)}
+.item input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent);flex:none;margin:0}
+.item.feito .title{color:var(--muted);text-decoration:line-through}
+.ing{margin:0;padding-left:18px;display:grid;gap:2px}
+.ing li.falta{color:var(--danger)}
+.ing li.tem{color:var(--good)}
+.dia{display:grid;gap:8px}
+.dia .refeicao{display:grid;grid-template-columns:4.5rem 1fr;gap:8px;align-items:center}
+dialog{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);padding:18px;width:min(560px,calc(100vw - 32px))}
+dialog::backdrop{background:rgb(0 0 0 / .4)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:.9rem;max-width:calc(100vw - 32px);z-index:20}
+ol.steps{margin:8px 0 0;padding-left:20px;display:grid;gap:4px}
+code{font-size:.85em;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+@media (max-width:420px){ nav.tabs button{font-size:.78rem;padding:10px 2px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Cozinha</h1>
+      <p class="muted small" id="today"></p>
+    </div>
+    <span id="status">Só neste navegador</span>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button data-tab="despensa" aria-selected="true">Despensa</button>
+    <button data-tab="lista" aria-selected="false">Lista <span class="n" id="n-lista"></span></button>
+    <button data-tab="ementa" aria-selected="false">Ementa</button>
+    <button data-tab="receitas" aria-selected="false">Receitas</button>
+    <button data-tab="mais" aria-selected="false">Definições</button>
+  </nav>
+
+  <!-- ============ DESPENSA ============ -->
+  <section class="tab" id="tab-despensa">
+    <div class="block" id="d-usar-wrap" hidden>
+      <h2>Usar primeiro</h2>
+      <div class="list" id="d-usar"></div>
+    </div>
+
+    <div class="block" id="d-horta-wrap" hidden>
+      <h2>Colhido na horta</h2>
+      <div class="list" id="d-horta"></div>
+    </div>
+
+    <div class="panel">
+      <form class="f" id="f-produto" autocomplete="off">
+        <h2>Juntar à despensa</h2>
+        <div class="fields">
+          <label class="fl">Produto<input id="p-nome" required placeholder="Ex.: arroz, iogurtes, frango"></label>
+          <label class="fl">Onde<select id="p-local"></select></label>
+          <label class="fl">Validade (opcional)<input id="p-validade" type="date"></label>
+        </div>
+        <div class="actions"><button class="btn primary" type="submit">Juntar</button></div>
+      </form>
+    </div>
+
+    <div class="block">
+      <div class="block-head">
+        <h2>O que há em casa</h2>
+        <input id="d-busca" type="search" placeholder="Procurar" style="max-width:12rem" aria-label="Procurar na despensa">
+      </div>
+      <p class="muted small">Toque em <strong>Pouco</strong> ou <strong>Acabou</strong> e o produto vai sozinho para a lista de compras.</p>
+      <div id="d-grupos" class="block"></div>
+    </div>
+  </section>
+
+  <!-- ============ LISTA ============ -->
+  <section class="tab" id="tab-lista" hidden>
+    <div class="panel">
+      <form class="f" id="f-lista" autocomplete="off">
+        <div class="fields">
+          <label class="fl">Juntar à lista<input id="l-nome" required placeholder="Ex.: leite"></label>
+          <label class="fl">Quantidade (opcional)<input id="l-qtd" placeholder="Ex.: 2 pacotes"></label>
+        </div>
+        <div class="actions">
+          <button class="btn primary" type="submit">Juntar</button>
+          <button class="btn" type="button" id="btn-partilhar">Partilhar</button>
+          <button class="btn" type="button" id="btn-arrumar">Arrumar o que comprei</button>
+        </div>
+        <p class="muted small">Risque o que já está no carrinho. "Arrumar o que comprei" põe esses produtos na despensa como <em>Tenho</em> e tira-os da lista.</p>
+      </form>
+    </div>
+    <div id="l-grupos" class="block"></div>
+  </section>
+
+  <!-- ============ EMENTA ============ -->
+  <section class="tab" id="tab-ementa" hidden>
+    <div class="block-head">
+      <h2 id="e-titulo">Ementa</h2>
+      <div class="actions">
+        <button class="btn" id="e-ant" aria-label="Semana anterior">‹</button>
+        <button class="btn" id="e-hoje">Esta semana</button>
+        <button class="btn" id="e-seg" aria-label="Semana seguinte">›</button>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="btn-faltas">Pôr na lista o que falta</button>
+      <button class="btn" id="btn-claude">Pedir ementa ao Claude</button>
+      <button class="btn" id="btn-colar">Colar a resposta</button>
+    </div>
+    <p class="muted small">Escreva o prato ou escolha uma receita. As receitas mostram quantos ingredientes já tem em casa.</p>
+    <datalist id="dl-receitas"></datalist>
+    <div id="e-dias" class="block"></div>
+  </section>
+
+  <!-- ============ RECEITAS ============ -->
+  <section class="tab" id="tab-receitas" hidden>
+    <div class="block-head">
+      <h2>Receitas da família</h2>
+      <button class="btn primary" id="btn-receita">+ Nova receita</button>
+    </div>
+    <div class="actions">
+      <input id="r-busca" type="search" placeholder="Procurar receita ou ingrediente" style="flex:1" aria-label="Procurar receitas">
+      <select id="r-ordem" aria-label="Ordenar" style="max-width:13rem">
+        <option value="tenho">O que dá com o que tenho</option>
+        <option value="nome">Por nome</option>
+        <option value="tempo">Mais rápidas</option>
+      </select>
+    </div>
+    <div id="r-lista" class="list"></div>
+  </section>
+
+  <!-- ============ DEFINIÇÕES ============ -->
+  <section class="tab" id="tab-mais" hidden>
+    <div class="panel">
+      <form class="f" id="f-familia" autocomplete="off">
+        <h2>A família</h2>
+        <div class="fields">
+          <label class="fl">Pessoas<input id="fa-pessoas" placeholder="2 adultos e 1 criança"></label>
+          <label class="fl">Orçamento do supermercado (€/mês)<input id="fa-orc" type="number" min="0" step="10" inputmode="numeric"></label>
+          <label class="fl">Almoços a planear<select id="fa-almocos"><option value="fds">Só ao fim de semana</option><option value="todos">Todos os dias</option><option value="nenhum">Nenhum</option></select></label>
+        </div>
+        <label class="fl">Gostos e notas (para as sugestões)<textarea id="fa-notas" placeholder="Ex.: o Pedro não gosta de… · jantares rápidos nos dias de escola · comprar no Lidl e na Mercadona"></textarea></label>
+        <div class="actions"><button class="btn primary" type="submit">Guardar</button></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <form class="f" id="f-cfg" autocomplete="off">
+        <h2>Onde se guardam os dados</h2>
+        <p class="small" id="cfg-estado"></p>
+        <details>
+          <summary class="small" style="cursor:pointer;font-weight:700">Como ligar (Carlos e Liliana)</summary>
+          <ol class="steps small">
+            <li><strong>No browser onde já usa o Descomplica:</strong> em <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener">github.com/settings/personal-access-tokens</a>, abra o token do Descomplica, em <em>Repository access</em> junte <code>cozinha-dados</code> e guarde. A Cozinha usa esse token sozinha.</li>
+            <li><strong>Telemóvel da Liliana:</strong> o Carlos cria um token novo em <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>, com <em>Only select repositories</em> → só <code>cozinha-dados</code>, e <em>Contents: Read and write</em>. Cola-se aqui, no telemóvel dela. Esse token não dá acesso ao Descomplica.</li>
+          </ol>
+        </details>
+        <div class="fields">
+          <label class="fl">Repositório dos dados<input id="cfg-repo" placeholder="oakshift/cozinha-dados"></label>
+          <label class="fl">Token do GitHub (vazio = usar o do Descomplica)<input id="cfg-token" type="password" placeholder="github_pat_…"></label>
+        </div>
+        <div class="actions">
+          <button class="btn primary" type="submit">Guardar e ligar</button>
+          <button class="btn danger" type="button" id="btn-desligar">Apagar token</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="block">
+        <h2>Cópia e receitas de exemplo</h2>
+        <div class="actions">
+          <button class="btn" id="btn-backup">Descarregar cópia (.json)</button>
+          <button class="btn" id="btn-exemplos">Repor receitas de exemplo</button>
+        </div>
+        <p class="muted small">"Repor receitas de exemplo" só volta a juntar as que tenha apagado; não mexe nas suas.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<dialog id="dlg-produto">
+  <form class="f" id="f-dp" method="dialog" autocomplete="off">
+    <h2>Editar produto</h2>
+    <label class="fl">Produto<input id="dp-nome" required></label>
+    <div class="fields">
+      <label class="fl">Onde<select id="dp-local"></select></label>
+      <label class="fl">Secção da loja<select id="dp-seccao"></select></label>
+      <label class="fl">Validade<input id="dp-validade" type="date"></label>
+    </div>
+    <div class="actions">
+      <button class="btn primary" type="submit" value="ok">Guardar</button>
+      <button class="btn" type="button" id="dp-cancelar">Cancelar</button>
+      <span style="flex:1"></span>
+      <button class="btn danger" type="button" id="dp-apagar">Apagar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-receita">
+  <form class="f" id="f-dr" method="dialog" autocomplete="off">
+    <h2 id="dr-titulo">Nova receita</h2>
+    <label class="fl">Nome<input id="dr-nome" required></label>
+    <div class="fields">
+      <label class="fl">Tempo (min)<input id="dr-tempo" type="number" min="0" step="5" inputmode="numeric"></label>
+      <label class="fl">Etiquetas<input id="dr-etiquetas" placeholder="rápida, congela, o Pedro gosta"></label>
+    </div>
+    <label class="fl">Ingredientes (um por linha)<textarea id="dr-ingredientes" rows="6" placeholder="500 g de carne picada&#10;1 cebola&#10;2 dentes de alho"></textarea></label>
+    <label class="fl">Como se faz<textarea id="dr-passos" rows="5"></textarea></label>
+    <div class="actions">
+      <button class="btn primary" type="submit" value="ok">Guardar</button>
+      <button class="btn" type="button" id="dr-cancelar">Cancelar</button>
+      <span style="flex:1"></span>
+      <button class="btn danger" type="button" id="dr-apagar">Apagar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-claude">
+  <form class="f" method="dialog" autocomplete="off" id="f-claude">
+    <h2 id="dc-titulo">Pedir ementa ao Claude</h2>
+    <p class="small" id="dc-texto"></p>
+    <textarea id="dc-area" rows="10"></textarea>
+    <div class="actions">
+      <button class="btn primary" type="button" id="dc-ok">Copiar e abrir o Claude</button>
+      <button class="btn" type="button" id="dc-fechar">Fechar</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" hidden></div>
+
+<script>
+const FILE = "cozinha.json";
+const DEFAULT_REPO = "oakshift/cozinha-dados";
+
+const LOCAIS = [["despensa","Despensa"],["frigorifico","Frigorífico"],["congelador","Congelador"],["casa","Limpeza e higiene"]];
+const LOCAL_NOME = Object.fromEntries(LOCAIS);
+const NIVEIS = [[2,"Tenho"],[1,"Pouco"],[0,"Acabou"]];
+/* Store sections, in walking order; the first pattern that matches a product name wins. */
+const SECCOES = [
+  ["frescos","Frutas e legumes", /\b(batata|cenoura|cebola|alho|abobora|curgete|couve|alface|pimento|limao|laranja|maca|pera|banana|uva|kiwi|morango|fruta|legume|espinafre|brocolo|salsa|coentro|cogumelo|beringela|feijao verde|pepino|tomate(?! pelado| em lata|s? pelados?)(?!.*(polpa|concentrado|molho))|rucula|agriao|nabo|alho frances|gengibre|abacate|diospiro|tangerina)/],
+  ["padaria","Padaria", /\b(pao|broa|tosta|bolo|croissant|bola de berlim)/],
+  ["talho","Talho e peixaria", /\b(frango|peru|porco|vaca|novilho|carne|bife|febra|costeleta|entrecosto|salsicha|chourico|fiambre|presunto|pescada|salmao|bacalhau|dourada|robalo|sardinha|carapau|camarao|lula|polvo|peixe|perna|coxa|lombo|hamburguer)/],
+  ["lacticinios","Lacticínios e ovos", /\b(leite(?! de coco)|iogurte|queijo|manteiga|natas|ovo|kefir|requeijao)/],
+  ["congelados","Congelados", /\b(congelad|ervilha|douradinho|gelado|espinafre congelad|batata frita congelad)/],
+  ["mercearia","Mercearia", /\b(batata palha|arroz|massa|esparguete|macarrao|lasanha|feijao|grao|lentilha|atum|sardinha em|cavala|azeite|oleo|vinagre|sal|acucar|farinha|fermento|cafe|cha|bolacha|cereai|aveia|mel|compota|tomate pelado|polpa de tomate|concentrado|molho|leite de coco|caril|colorau|pimenta|oregao|louro|cominho|canela|especiaria|caldo|conserva|azeitona|cacau|chocolate|frutos secos|noz|amendoa|maionese|ketchup|mostarda|batata palha)/],
+  ["bebidas","Bebidas", /\b(agua|sumo|nectar|vinho|cerveja|refrigerante|coca)/],
+  ["limpeza","Limpeza", /\b(detergente|lixivia|amaciador|esponja|rolo de cozinha|papel de cozinha|tira nodoa|multiusos|desengordurante|saco do lixo|sacos do lixo|pastilha)/],
+  ["higiene","Higiene", /\b(papel higienico|champo|gel de banho|pasta de dentes|escova|sabonete|desodorizante|fralda|toalhita|penso|algodao)/],
+  ["outros","Outros", /./]
+];
+const SECCAO_NOME = Object.fromEntries(SECCOES.map(s => [s[0], s[1]]));
+const LOCAL_POR_SECCAO = {frescos:"despensa", padaria:"despensa", talho:"frigorifico", lacticinios:"frigorifico", congelados:"congelador", limpeza:"casa", higiene:"casa"};
+/* Always in the house: never put on the list and do not count when checking a recipe. */
+const BASICOS = ["sal","pimenta","agua","agua a ferver"];
+
+const RECEITAS_EXEMPLO = [
+  {id:"x-sopa", nome:"Sopa de legumes", tempo:40, etiquetas:["sopa","barata","congela"], ingredientes:["3 batatas","2 cenouras","1 cebola","2 dentes de alho","1 fatia de abóbora","1 curgete","couve ou espinafres","azeite","sal"], passos:"Cozer batata, cenoura, cebola, alho, abóbora e curgete em água com sal (25 min). Triturar, juntar a couve às tiras e cozer mais 5 min. Fio de azeite no fim. Dá para 2 dias ou para congelar."},
+  {id:"x-bolonhesa", nome:"Massa à bolonhesa", tempo:35, etiquetas:["família","congela"], ingredientes:["500 g de esparguete","500 g de carne picada","1 cebola","2 dentes de alho","1 lata de tomate pelado","1 cenoura","azeite","louro","sal"], passos:"Refogar cebola, alho e cenoura ralada em azeite. Juntar a carne e alourar. Tomate pelado, louro e sal; 20 min em lume brando. Servir com a massa cozida. Fazer o dobro do molho e congelar metade."},
+  {id:"x-arroz-frango", nome:"Arroz de frango", tempo:45, etiquetas:["família"], ingredientes:["600 g de frango","300 g de arroz","1 cebola","2 dentes de alho","1 cenoura","100 g de ervilhas","azeite","louro","sal"], passos:"Alourar o frango aos pedaços num refogado de cebola e alho. Cobrir com água, cozer 15 min. Juntar o arroz, a cenoura e as ervilhas e o dobro de água do arroz; 15 min."},
+  {id:"x-frango-forno", nome:"Frango no forno com batatas", tempo:75, etiquetas:["fim de semana"], ingredientes:["1 frango","1 kg de batatas","1 cebola","4 dentes de alho","1 limão","azeite","colorau","sal"], passos:"Temperar o frango com alho, limão, colorau, sal e azeite. Tabuleiro com batatas e cebola às rodelas. Forno a 200 °C, 1 h, regando com o molho."},
+  {id:"x-peixe-forno", nome:"Peixe no forno com legumes", tempo:45, etiquetas:["peixe"], ingredientes:["4 postas de pescada","600 g de batatas","1 cebola","1 pimento","2 tomates","2 dentes de alho","azeite","sal"], passos:"Batata às rodelas no fundo do tabuleiro, peixe por cima, cebola, pimento e tomate às rodelas, alho, sal e azeite. Forno a 190 °C, 35 min."},
+  {id:"x-omelete", nome:"Omelete de legumes", tempo:15, etiquetas:["rápida","vegetariana"], ingredientes:["6 ovos","1 cebola","1 pimento","1 curgete","queijo ralado","azeite","sal"], passos:"Saltear os legumes picados em azeite. Juntar os ovos batidos com sal e queijo; cozinhar em lume brando e virar."},
+  {id:"x-esparguete-atum", nome:"Esparguete com atum e tomate", tempo:20, etiquetas:["rápida","barata"], ingredientes:["400 g de esparguete","2 latas de atum","1 lata de tomate pelado","1 cebola","2 dentes de alho","azeite","orégãos","sal"], passos:"Refogar cebola e alho, juntar o tomate e deixar apurar 10 min. Atum escorrido e orégãos. Misturar com a massa cozida."},
+  {id:"x-empadao", nome:"Empadão de carne", tempo:60, etiquetas:["família","congela"], ingredientes:["500 g de carne picada","1 kg de batatas","200 ml de leite","manteiga","1 cebola","2 dentes de alho","1 lata de tomate pelado","1 ovo","sal"], passos:"Puré com as batatas, leite e manteiga. Carne estufada com cebola, alho e tomate. Camadas de puré, carne, puré; pincelar com ovo. Forno a 200 °C, 20 min."},
+  {id:"x-caril-grao", nome:"Caril de grão com espinafres", tempo:30, etiquetas:["vegetariana","rápida"], ingredientes:["2 latas de grão-de-bico","1 lata de leite de coco","1 lata de tomate pelado","1 cebola","2 dentes de alho","1 colher de caril","espinafres","arroz","sal"], passos:"Refogar cebola e alho, juntar o caril, o tomate e o leite de coco. Grão escorrido, 10 min. Espinafres no fim. Servir com arroz."},
+  {id:"x-arroz-atum", nome:"Arroz de atum", tempo:30, etiquetas:["barata","rápida"], ingredientes:["300 g de arroz","2 latas de atum","1 cebola","2 dentes de alho","1 tomate","1 pimento","azeite","sal"], passos:"Refogar cebola, alho, pimento e tomate. Arroz e o dobro de água; 15 min. Juntar o atum no fim."},
+  {id:"x-hamburgueres", nome:"Hambúrgueres caseiros com salada", tempo:25, etiquetas:["o Pedro gosta?","rápida"], ingredientes:["500 g de carne picada","4 pães de hambúrguer","1 ovo","alface","2 tomates","1 cebola","queijo","sal"], passos:"Misturar a carne com ovo, cebola picada e sal; moldar 4 hambúrgueres e grelhar. Servir no pão com alface, tomate e queijo."},
+  {id:"x-bras", nome:"Bacalhau à Brás", tempo:30, etiquetas:["clássico"], ingredientes:["400 g de bacalhau desfiado","200 g de batata palha","6 ovos","2 cebolas","2 dentes de alho","azeite","salsa","azeitonas"], passos:"Alourar cebola e alho em azeite, juntar o bacalhau e a batata palha. Ovos batidos, mexer até ficarem cremosos. Salsa e azeitonas."},
+  {id:"x-creme-abobora", nome:"Creme de abóbora", tempo:35, etiquetas:["sopa","horta","congela"], ingredientes:["800 g de abóbora","1 cebola","2 cenouras","1 batata","azeite","sal"], passos:"Cozer tudo em água com sal (25 min), triturar e juntar um fio de azeite."},
+  {id:"x-pimentos-recheados", nome:"Pimentos recheados", tempo:50, etiquetas:["horta","forno"], ingredientes:["4 pimentos","150 g de arroz","300 g de carne picada","1 cebola","1 tomate","queijo ralado","azeite","sal"], passos:"Cozer o arroz. Refogar cebola, carne e tomate e misturar com o arroz. Rechear os pimentos sem sementes, queijo por cima. Forno a 190 °C, 30 min."}
+];
+
+const vazio = () => ({produtos:[], lista:[], receitas:[], ementa:{}, familia:{pessoas:"", orcamento:0, almocos:"fds", notas:""}});
+const completo = d => { const v = vazio(); return {...v, ...d, familia: {...v.familia, ...(d.familia || {})}}; };
+let S = vazio();
+
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad = n => String(n).padStart(2,"0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const hoje = () => iso(new Date());
+const parse = s => { const [y,m,d] = String(s).split("-").map(Number); return new Date(y, (m||1)-1, d||1); };
+const fmt = (s, opts={day:"numeric",month:"short"}) => s ? parse(s).toLocaleDateString("pt-PT", opts) : "";
+const dias = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+const somaDias = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d); };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const num = v => Number(String(v ?? "").replace(",", ".")) || 0;
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => t.hidden = true, 3000); }
+function setStatus(txt, cls){ const s = $("#status"); s.textContent = txt; s.className = cls || ""; }
+
+/* ---------- words: matching products, ingredients and list items ---------- */
+const STOP = new Set(["de","do","da","dos","das","com","e","em","a","o","as","os","q","b","qb","gosto","um","uma","uns","umas","para","ou","sem","fatia","fatias","lata","latas","pacote","pacotes","emb","embalagem","colher","colheres","cha","sopa","chavena","dente","dentes","g","kg","ml","l","cl","unid","molho","ramo","pitada","fio","bom","boa","grande","grandes","pequeno","pequena","fresco","fresca","picado","picada","ralado","ralada","cozido","cozida","inteiro","inteira","posta","postas","file","files"]);
+const semAcentos = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const singular = w => w.length > 4 && w.endsWith("oes") ? w.slice(0, -3) + "ao" : w.length > 4 && w.endsWith("aes") ? w.slice(0, -3) + "ao" : w.length > 3 && w.endsWith("s") ? w.slice(0, -1) : w;
+/* Keep "leite", "chá" etc. meaningful only where they are the product itself. */
+function palavras(s){
+  const ws = semAcentos(s).replace(/[^a-z\s-]/g, " ").replace(/-/g, " ").split(/\s+/).filter(Boolean).map(singular);
+  const sem = ws.filter(w => !STOP.has(w) && w.length > 1);
+  return sem.length ? sem : ws.filter(w => w.length > 1);
+}
+const chave = s => palavras(s).join(" ");
+/* A product covers an ingredient when all the product's words are in the ingredient, or the other way round. */
+function cobre(produto, ingrediente){
+  const p = palavras(produto), i = palavras(ingrediente);
+  if (!p.length || !i.length) return false;
+  return p.every(w => i.includes(w)) || i.every(w => p.includes(w));
+}
+const basico = ing => BASICOS.includes(chave(ing));
+function seccaoDe(nome){ const n = semAcentos(nome); return (SECCOES.find(s => s[2].test(n)) || SECCOES.at(-1))[0]; }
+const emCasa = ing => S.produtos.find(p => p.nivel > 0 && cobre(p.nome, ing));
+function coberturaReceita(r){
+  const ings = (r.ingredientes || []).filter(i => !basico(i));
+  const tem = ings.filter(i => emCasa(i));
+  const usa = ings.map(emCasa).filter(p => p && p.validade && dias(hoje(), p.validade) <= 3);
+  return {total: ings.length, tem: tem.length, falta: ings.filter(i => !emCasa(i)), usaQuaseFora: usa};
+}
+const receitaPorNome = nome => { const k = chave(nome); return k ? S.receitas.find(r => chave(r.nome) === k) : null; };
+
+/* ---------- storage: GitHub repo or this browser ---------- */
+const ls = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k){ try { localStorage.removeItem(k); } catch {} }
+};
+let cfg = ls.get("cozinha-cfg") || {repo: DEFAULT_REPO, token: ""};
+/* Same site as the Descomplica: without a token of its own, the Cozinha uses that one (it needs access to cozinha-dados). */
+const token = () => cfg.token || ls.get("descomplica-cfg")?.token || "";
+const online = () => !!(token() && cfg.repo);
+const b64enc = str => { const b = new TextEncoder().encode(str); let bin = ""; for (let i = 0; i < b.length; i += 0x8000) bin += String.fromCharCode(...b.subarray(i, i + 0x8000)); return btoa(bin); };
+const b64dec = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g, "")), c => c.charCodeAt(0)));
+class GhError extends Error { constructor(status, msg){ super(msg); this.status = status; } }
+async function gh(method, body){
+  const r = await fetch(`https://api.github.com/repos/${cfg.repo}/contents/${FILE}`, {
+    method, cache: "no-store",
+    headers: {"Authorization": `Bearer ${token()}`, "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", ...(body ? {"Content-Type": "application/json"} : {})},
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!r.ok) throw new GhError(r.status, (await r.json().catch(() => ({}))).message || r.statusText);
+  return r.json();
+}
+async function ghLoad(){
+  try { const j = await gh("GET"); return {data: completo(JSON.parse(b64dec(j.content))), sha: j.sha}; }
+  catch (e) { if (e.status === 404 && cfg.token) return {data: vazio(), sha: null}; throw e; }
+}
+function ghMsg(e){
+  if (e?.status === 401) return "O token do GitHub não é válido ou expirou.";
+  if (e?.status === 403 || e?.status === 404) return cfg.token ? "O token não tem acesso ao repositório da cozinha (Contents: Read and write)." : "O token do Descomplica ainda não tem acesso ao cozinha-dados: veja Definições.";
+  return "Sem ligação ao GitHub. Fica guardado aqui e é enviado depois.";
+}
+
+/* ---------- every change is a named operation ----------
+   It is applied here at once, kept in a queue in this browser, and applied again to the freshest copy on GitHub,
+   so two phones and a supermarket without network never lose each other's changes. d._feitos holds the ids applied. */
+const OPS = {
+  addProduto(d, {p}){ if (!d.produtos.some(x => x.id === p.id)) d.produtos.push(p); },
+  editProduto(d, {id, campos}){ const x = d.produtos.find(y => y.id === id); if (x) Object.assign(x, campos); },
+  delProduto(d, {id}){ d.produtos = d.produtos.filter(x => x.id !== id); d.lista = d.lista.filter(i => i.produto !== id || i.feito); },
+  nivel(d, {id, nivel, itemId}){
+    const p = d.produtos.find(x => x.id === id); if (!p) return;
+    p.nivel = nivel;
+    if (nivel < 2){ if (!d.lista.some(i => i.produto === id && !i.feito)) d.lista.push({id: itemId, nome: p.nome, qtd: "", seccao: p.seccao || seccaoDe(p.nome), feito: false, produto: id, origem: "despensa"}); }
+    else d.lista = d.lista.filter(i => !(i.produto === id && !i.feito));
+  },
+  addItem(d, {it}){
+    if (d.lista.some(i => i.id === it.id)) return;
+    if (d.lista.some(i => !i.feito && chave(i.nome) === chave(it.nome))) return;
+    const p = d.produtos.find(x => chave(x.nome) === chave(it.nome)); if (p) it.produto = p.id;
+    d.lista.push(it);
+  },
+  marcar(d, {id, feito}){ const i = d.lista.find(x => x.id === id); if (i) i.feito = feito; },
+  delItem(d, {id}){ d.lista = d.lista.filter(x => x.id !== id); },
+  /* Bought items go to the pantry as "Tenho"; new ones are created where the store section suggests. */
+  arrumar(d, {ids, novos}){
+    for (const id of ids){
+      const i = d.lista.find(x => x.id === id && x.feito); if (!i) continue;
+      const p = i.produto && d.produtos.find(x => x.id === i.produto) || d.produtos.find(x => chave(x.nome) === chave(i.nome));
+      if (p) p.nivel = 2;
+      else d.produtos.push({id: novos[id], nome: i.nome, local: LOCAL_POR_SECCAO[i.seccao] || "despensa", nivel: 2, validade: "", seccao: i.seccao});
+      d.lista = d.lista.filter(x => x.id !== id);
+    }
+  },
+  addReceita(d, {r}){ if (!d.receitas.some(x => x.id === r.id || chave(x.nome) === chave(r.nome))) d.receitas.push(r); },
+  editReceita(d, {id, campos}){ const x = d.receitas.find(y => y.id === id); if (x) Object.assign(x, campos); },
+  delReceita(d, {id}){ d.receitas = d.receitas.filter(x => x.id !== id); },
+  ementa(d, {data, refeicao, prato}){ const e = d.ementa[data] ||= {}; if (prato) e[refeicao] = prato; else { delete e[refeicao]; if (!Object.keys(e).length) delete d.ementa[data]; } },
+  familia(d, {campos}){ d.familia = {...d.familia, ...campos}; }
+};
+const MSG = {addProduto: a => `Despensa: ${a.p.nome}`, editProduto: () => "Despensa: editar", delProduto: () => "Despensa: apagar", nivel: a => `Despensa: ${["acabou","pouco","tenho"][a.nivel]}`,
+  addItem: a => `Lista: ${a.it.nome}`, marcar: () => "Lista: marcar", delItem: () => "Lista: tirar", arrumar: a => `Lista: arrumar ${a.ids.length}`,
+  addReceita: a => `Receita: ${a.r.nome}`, editReceita: () => "Receita: editar", delReceita: () => "Receita: apagar", ementa: a => `Ementa ${a.data}`, familia: () => "Família"};
+function aplicar(d, o){
+  const f = d._feitos ||= []; if (f.includes(o.id)) return;
+  OPS[o.op](d, o.args); f.push(o.id); if (f.length > 500) f.splice(0, f.length - 500);
+}
+const fila = () => ls.get("cozinha-fila") || [];
+function fazer(op, args){
+  const o = {id: uid(), op, args};
+  aplicar(S, o); ls.set("cozinha-cache", S);
+  if (online()) ls.set("cozinha-fila", [...fila(), o]);
+  renderAll(); enviar();
+}
+let aEnviar = false, deNovo = false;
+async function enviar(){
+  if (!online() || !fila().length) return estado();
+  if (aEnviar){ deNovo = true; return; }
+  aEnviar = true; setStatus("A guardar…");
+  try {
+    do {
+      deNovo = false;
+      const f = fila(); if (!f.length) break;
+      for (let t = 0; t < 3; t++){
+        const {data, sha} = await ghLoad();
+        f.forEach(o => aplicar(data, o));
+        const msg = f.length === 1 ? MSG[f[0].op](f[0].args) : `Cozinha: ${f.length} alterações`;
+        try {
+          await gh("PUT", {message: msg, content: b64enc(JSON.stringify(data, null, 1)), ...(sha ? {sha} : {})});
+          const ids = new Set(f.map(o => o.id)), resto = fila().filter(o => !ids.has(o.id));
+          ls.set("cozinha-fila", resto); S = data; resto.forEach(o => aplicar(S, o)); ls.set("cozinha-cache", S); renderAll();
+          break;
+        } catch (e) { if (!(e.status === 409 || e.status === 422) || t === 2) throw e; }
+      }
+    } while (deNovo || fila().length);
+    setStatus("Guardado", "ok");
+  } catch (e) { console.error(e); if (e instanceof GhError && e.status < 500) toast(ghMsg(e)); }
+  finally { aEnviar = false; estado(); }
+}
+function estado(){
+  const n = fila().length;
+  if (!online()) setStatus("Só neste navegador");
+  else if (n) setStatus(`${n} por enviar`, "bad");
+}
+async function reload(){
+  if (!online()) return estado();
+  try {
+    setStatus("A sincronizar…");
+    const {data} = await ghLoad();
+    S = data; fila().forEach(o => aplicar(S, o)); ls.set("cozinha-cache", S); renderAll(); setStatus("Sincronizado", "ok");
+    enviar();
+  } catch (e) { console.error(e); setStatus("Sem ligação", "bad"); if (e instanceof GhError) toast(ghMsg(e)); estado(); }
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reload(); });
+window.addEventListener("online", () => reload());
+
+/* ---------- tabs ---------- */
+function showTab(name){
+  document.querySelectorAll("nav.tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === name));
+  document.querySelectorAll("section.tab").forEach(s => s.hidden = s.id !== `tab-${name}`);
+  ls.set("cozinha-tab", name);
+}
+document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => { showTab(b.dataset.tab); window.scrollTo({top:0}); }));
+const lista = (el, rows, vazioTxt) => { el.innerHTML = rows.length ? rows.join("") : `<div class="empty">${vazioTxt}</div>`; };
+const opcoes = (pares, sel) => pares.map(([v, n]) => `<option value="${esc(v)}" ${String(v) === String(sel) ? "selected" : ""}>${esc(n)}</option>`).join("");
+
+/* ---------- despensa ---------- */
+function chipValidade(p){
+  if (!p.validade) return "";
+  const n = dias(hoje(), p.validade);
+  const txt = n < 0 ? `passou ${fmt(p.validade)}` : n === 0 ? "acaba hoje" : n === 1 ? "acaba amanhã" : n <= 5 ? `acaba em ${n} dias` : `até ${fmt(p.validade)}`;
+  return `<span class="chip ${n <= 1 ? "late" : n <= 5 ? "soon" : ""}">${esc(txt)}</span>`;
+}
+const linhaProduto = p => `<div class="row"><div class="grow"><span class="title">${esc(p.nome)}</span>
+    <div class="meta">${chipValidade(p)}${p.origem?.startsWith("horta") ? `<span class="chip good">da horta</span>` : ""}</div></div>
+  <div class="seg" role="group" aria-label="${esc(p.nome)}">${NIVEIS.map(([n, t]) => `<button type="button" data-nivel="${n}" data-n="${n}" data-prod="${esc(p.id)}" aria-pressed="${p.nivel === n}">${t}</button>`).join("")}</div>
+  <button class="x" data-editar-prod="${esc(p.id)}" aria-label="Editar ${esc(p.nome)}">Editar</button></div>`;
+function renderDespensa(){
+  const q = chave($("#d-busca").value);
+  const ps = [...S.produtos].filter(p => !q || chave(p.nome).includes(q)).sort((a, b) => a.nome.localeCompare(b.nome, "pt"));
+  $("#d-grupos").innerHTML = LOCAIS.map(([l, nome]) => {
+    const g = ps.filter(p => (p.local || "despensa") === l); if (!g.length) return "";
+    const falta = g.filter(p => p.nivel < 2).length;
+    return `<div class="block"><div class="block-head"><h3>${esc(nome)}</h3><span class="muted small">${g.length}${falta ? ` · ${falta} a acabar` : ""}</span></div><div class="list">${g.map(linhaProduto).join("")}</div></div>`;
+  }).join("") || `<div class="list"><div class="empty">${q ? "Nada encontrado." : "Ainda vazia. Junte o que tem em casa, começando pelo que mais usa."}</div></div>`;
+  const usar = S.produtos.filter(p => p.nivel > 0 && p.validade && dias(hoje(), p.validade) <= 3).sort((a, b) => a.validade.localeCompare(b.validade));
+  $("#d-usar-wrap").hidden = !usar.length;
+  $("#d-usar").innerHTML = usar.map(p => {
+    const rs = S.receitas.filter(r => (r.ingredientes || []).some(i => cobre(p.nome, i))).slice(0, 3);
+    return `<div class="row"><div class="grow"><span class="title">${esc(p.nome)}</span><div class="meta">${chipValidade(p)}${rs.length ? `<span class="small muted">Dá para: ${rs.map(r => esc(r.nome)).join(", ")}</span>` : ""}</div></div></div>`;
+  }).join("");
+  renderHorta();
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("button[data-nivel]");
+  if (b){ fazer("nivel", {id: b.dataset.prod, nivel: Number(b.dataset.nivel), itemId: uid()}); return; }
+  const ed = e.target.closest("button[data-editar-prod]"); if (ed) abrirProduto(ed.dataset.editarProd);
+});
+$("#p-local").innerHTML = opcoes(LOCAIS, "despensa");
+$("#p-nome").addEventListener("input", e => { const s = seccaoDe(e.target.value); $("#p-local").value = LOCAL_POR_SECCAO[s] || "despensa"; });
+$("#f-produto").addEventListener("submit", e => {
+  e.preventDefault();
+  const nome = $("#p-nome").value.trim(); if (!nome) return;
+  const ja = S.produtos.find(p => chave(p.nome) === chave(nome));
+  if (ja){ fazer("editProduto", {id: ja.id, campos: {nivel: 2, ...($("#p-validade").value ? {validade: $("#p-validade").value} : {})}}); fazer("nivel", {id: ja.id, nivel: 2, itemId: uid()}); toast(`${ja.nome}: já estava na despensa, marcado como Tenho.`); }
+  else { fazer("addProduto", {p: {id: uid(), nome, local: $("#p-local").value, nivel: 2, validade: $("#p-validade").value, seccao: seccaoDe(nome)}}); toast(`${nome} na despensa.`); }
+  $("#p-nome").value = ""; $("#p-validade").value = ""; $("#p-nome").focus();
+});
+$("#d-busca").addEventListener("input", renderDespensa);
+let editProd = null;
+$("#dp-local").innerHTML = opcoes(LOCAIS);
+$("#dp-seccao").innerHTML = opcoes(SECCOES.map(s => [s[0], s[1]]));
+function abrirProduto(id){
+  const p = S.produtos.find(x => x.id === id); if (!p) return; editProd = id;
+  $("#dp-nome").value = p.nome; $("#dp-local").value = p.local || "despensa"; $("#dp-seccao").value = p.seccao || seccaoDe(p.nome); $("#dp-validade").value = p.validade || "";
+  delete $("#dp-apagar").dataset.armed; $("#dp-apagar").textContent = "Apagar";
+  $("#dlg-produto").showModal();
+}
+$("#dp-cancelar").addEventListener("click", () => $("#dlg-produto").close());
+$("#f-dp").addEventListener("submit", () => {
+  const nome = $("#dp-nome").value.trim(); if (!nome) return;
+  fazer("editProduto", {id: editProd, campos: {nome, local: $("#dp-local").value, seccao: $("#dp-seccao").value, validade: $("#dp-validade").value}});
+});
+$("#dp-apagar").addEventListener("click", e => {
+  const b = e.currentTarget; if (!b.dataset.armed){ b.dataset.armed = "1"; b.textContent = "Confirmar"; return; }
+  $("#dlg-produto").close(); fazer("delProduto", {id: editProd}); toast("Produto apagado.");
+});
+
+/* Garden harvests of the last 14 days (Caderno da Horta, same site): one tap puts them in the pantry. */
+let horta = null;
+async function carregarHorta(){
+  const hc = ls.get("horta-cfg");
+  if (hc?.token && hc?.repo){
+    try { const r = await fetch(`https://api.github.com/repos/${hc.repo}/contents/dados.json`, {cache: "no-store", headers: {"Authorization": `Bearer ${hc.token}`, "Accept": "application/vnd.github+json"}});
+      if (r.ok){ horta = JSON.parse(b64dec((await r.json()).content)); renderHorta(); return; } } catch {}
+  }
+  horta = ls.get("horta-cache"); renderHorta();
+}
+function renderHorta(){
+  const ja = new Set(S.produtos.map(p => p.origem).filter(Boolean)), desde = somaDias(hoje(), -14);
+  const cs = (horta?.registos || []).filter(r => r.tipo === "colheita" && r.cultura && r.data >= desde && !ja.has(`horta:${r.id}`)).sort((a, b) => b.data.localeCompare(a.data));
+  $("#d-horta-wrap").hidden = !cs.length;
+  $("#d-horta").innerHTML = cs.map(r => `<div class="row"><div class="grow"><span class="title">${esc(r.cultura)}</span><span class="muted small">${esc(fmt(r.data))}${r.kg ? ` · ${String(r.kg).replace(".", ",")} kg` : r.quantidade ? ` · ${esc(r.quantidade)}` : ""}</span></div>
+    <button class="btn" data-horta="${esc(r.id)}">Pôr na despensa</button></div>`).join("");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("button[data-horta]"); if (!b) return;
+  const r = horta?.registos?.find(x => x.id === b.dataset.horta); if (!r) return;
+  fazer("addProduto", {p: {id: uid(), nome: r.cultura, local: "frigorifico", nivel: 2, validade: somaDias(hoje(), 7), seccao: "frescos", origem: `horta:${r.id}`}});
+  toast(`${r.cultura} na despensa (validade indicativa: 1 semana).`);
+});
+
+/* ---------- lista de compras ---------- */
+function renderLista(){
+  const pend = S.lista.filter(i => !i.feito).length;
+  $("#n-lista").textContent = pend ? `(${pend})` : "";
+  $("#l-grupos").innerHTML = SECCOES.map(([s, nome]) => {
+    const is = S.lista.filter(i => (i.seccao || "outros") === s).sort((a, b) => a.feito - b.feito || a.nome.localeCompare(b.nome, "pt")); if (!is.length) return "";
+    return `<div class="block"><h3>${esc(nome)}</h3><div class="list">${is.map(i => `<div class="row item ${i.feito ? "feito" : ""}">
+      <input type="checkbox" data-marcar="${esc(i.id)}" ${i.feito ? "checked" : ""} aria-label="No carrinho: ${esc(i.nome)}">
+      <div class="grow"><span class="title">${esc(i.nome)}</span><div class="meta">${i.qtd ? `<span class="chip">${esc(i.qtd)}</span>` : ""}${i.origem === "ementa" ? `<span class="chip">para a ementa</span>` : i.origem === "claude" ? `<span class="chip">sugestão</span>` : ""}</div></div>
+      <button class="x" data-tirar="${esc(i.id)}" aria-label="Tirar ${esc(i.nome)}">×</button></div>`).join("")}</div></div>`;
+  }).join("") || `<div class="list"><div class="empty">Lista vazia. O que marcar como Pouco ou Acabou na despensa aparece aqui.</div></div>`;
+  $("#btn-arrumar").disabled = !S.lista.some(i => i.feito);
+}
+document.addEventListener("change", e => { const id = e.target.dataset?.marcar; if (id) fazer("marcar", {id, feito: e.target.checked}); });
+document.addEventListener("click", e => { const b = e.target.closest("button[data-tirar]"); if (b) fazer("delItem", {id: b.dataset.tirar}); });
+$("#f-lista").addEventListener("submit", e => {
+  e.preventDefault();
+  const nome = $("#l-nome").value.trim(); if (!nome) return;
+  fazer("addItem", {it: {id: uid(), nome, qtd: $("#l-qtd").value.trim(), seccao: seccaoDe(nome), feito: false, origem: "manual"}});
+  $("#l-nome").value = ""; $("#l-qtd").value = ""; $("#l-nome").focus();
+});
+$("#btn-arrumar").addEventListener("click", () => {
+  const ids = S.lista.filter(i => i.feito).map(i => i.id); if (!ids.length) return;
+  fazer("arrumar", {ids, novos: Object.fromEntries(ids.map(id => [id, uid()]))});
+  toast(`${ids.length} ${ids.length === 1 ? "produto arrumado" : "produtos arrumados"} na despensa.`);
+});
+function textoLista(){
+  return "Lista de compras\n" + SECCOES.map(([s, nome]) => {
+    const is = S.lista.filter(i => !i.feito && (i.seccao || "outros") === s); if (!is.length) return "";
+    return `\n${nome}:\n` + is.map(i => `- ${i.nome}${i.qtd ? ` (${i.qtd})` : ""}`).join("\n");
+  }).join("\n").replace(/\n{3,}/g, "\n\n");
+}
+$("#btn-partilhar").addEventListener("click", async () => {
+  const t = textoLista();
+  if (navigator.share){ try { await navigator.share({text: t}); return; } catch {} }
+  try { await navigator.clipboard.writeText(t); toast("Lista copiada: cole no WhatsApp."); } catch { window.open(`https://wa.me/?text=${encodeURIComponent(t)}`, "_blank", "noopener"); }
+});
+
+/* ---------- receitas ---------- */
+let editRec = null;
+function renderReceitas(){
+  const q = chave($("#r-busca").value), ordem = $("#r-ordem").value;
+  const rs = S.receitas.map(r => ({r, c: coberturaReceita(r)}))
+    .filter(({r}) => !q || chave(r.nome).includes(q) || (r.ingredientes || []).some(i => chave(i).includes(q)) || (r.etiquetas || []).some(t => chave(t).includes(q)))
+    .sort((a, b) => ordem === "nome" ? a.r.nome.localeCompare(b.r.nome, "pt") : ordem === "tempo" ? num(a.r.tempo) - num(b.r.tempo) :
+      (b.c.usaQuaseFora.length - a.c.usaQuaseFora.length) || ((b.c.tem / (b.c.total || 1)) - (a.c.tem / (a.c.total || 1))) || a.r.nome.localeCompare(b.r.nome, "pt"));
+  lista($("#r-lista"), rs.map(({r, c}) => `<details class="row" style="display:block"><summary style="cursor:pointer;list-style:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="title" style="flex:1 1 10rem">${esc(r.nome)}</span>
+      <span class="chip ${c.total && c.tem === c.total ? "good" : ""}">tem ${c.tem} de ${c.total}</span>${r.tempo ? `<span class="chip">${esc(r.tempo)} min</span>` : ""}${c.usaQuaseFora.length ? `<span class="chip soon">usa ${esc(c.usaQuaseFora[0].nome)}</span>` : ""}${(r.etiquetas || []).map(t => `<span class="chip">${esc(t)}</span>`).join("")}</summary>
+      <div class="block" style="margin-top:8px">
+        <ul class="ing">${(r.ingredientes || []).map(i => `<li class="${basico(i) ? "" : emCasa(i) ? "tem" : "falta"}">${esc(i)}${basico(i) ? "" : emCasa(i) ? " ✓" : " — falta"}</li>`).join("")}</ul>
+        ${r.passos ? `<p class="small" style="white-space:pre-line">${esc(r.passos)}</p>` : ""}
+        <div class="actions">${c.falta.length ? `<button class="btn" data-faltas-rec="${esc(r.id)}">Pôr o que falta na lista</button>` : ""}<button class="btn" data-editar-rec="${esc(r.id)}">Editar</button></div>
+      </div></details>`), q ? "Nenhuma receita encontrada." : "Ainda sem receitas.");
+  $("#dl-receitas").innerHTML = S.receitas.map(r => `<option value="${esc(r.nome)}">`).join("");
+}
+$("#r-busca").addEventListener("input", renderReceitas);
+$("#r-ordem").addEventListener("change", renderReceitas);
+function porNaLista(ings, origem){
+  const ja = new Set(S.lista.filter(i => !i.feito).map(i => chave(i.nome))); let n = 0;
+  for (const ing of ings){
+    const nome = nomeCompra(ing), k = chave(nome); if (!k || ja.has(k)) continue; ja.add(k);
+    fazer("addItem", {it: {id: uid(), nome, qtd: "", seccao: seccaoDe(nome), feito: false, origem}}); n++;
+  }
+  return n;
+}
+/* "500 g de carne picada" → "carne picada" for the shopping list. */
+const nomeCompra = ing => String(ing).replace(/^\s*[\d.,/½¼¾]+\s*(g|kg|ml|l|cl|unid\.?|latas?|pacotes?|colher(es)?( de (sopa|chá))?|chávenas?|dentes?|fatias?|postas?)?\s*(de\s+)?/i, "").replace(/\s+/g, " ").trim().replace(/^./, c => c.toUpperCase());
+document.addEventListener("click", e => {
+  const f = e.target.closest("button[data-faltas-rec]");
+  if (f){ const r = S.receitas.find(x => x.id === f.dataset.faltasRec); if (r){ const n = porNaLista(coberturaReceita(r).falta, "ementa"); toast(n ? `${n} ${n === 1 ? "ingrediente" : "ingredientes"} na lista.` : "Já estava tudo na lista."); } }
+  const ed = e.target.closest("button[data-editar-rec]"); if (ed) abrirReceita(ed.dataset.editarRec);
+});
+function abrirReceita(id){
+  editRec = id || null; const r = id ? S.receitas.find(x => x.id === id) : null;
+  $("#dr-titulo").textContent = r ? "Editar receita" : "Nova receita";
+  $("#dr-nome").value = r?.nome || ""; $("#dr-tempo").value = r?.tempo || ""; $("#dr-etiquetas").value = (r?.etiquetas || []).join(", ");
+  $("#dr-ingredientes").value = (r?.ingredientes || []).join("\n"); $("#dr-passos").value = r?.passos || "";
+  $("#dr-apagar").hidden = !r; delete $("#dr-apagar").dataset.armed; $("#dr-apagar").textContent = "Apagar";
+  $("#dlg-receita").showModal(); if (!r) $("#dr-nome").focus();
+}
+$("#btn-receita").addEventListener("click", () => abrirReceita());
+$("#dr-cancelar").addEventListener("click", () => $("#dlg-receita").close());
+$("#f-dr").addEventListener("submit", () => {
+  const campos = {nome: $("#dr-nome").value.trim(), tempo: num($("#dr-tempo").value), etiquetas: $("#dr-etiquetas").value.split(",").map(s => s.trim()).filter(Boolean),
+    ingredientes: $("#dr-ingredientes").value.split("\n").map(s => s.trim()).filter(Boolean), passos: $("#dr-passos").value.trim()};
+  if (!campos.nome) return;
+  if (editRec) fazer("editReceita", {id: editRec, campos}); else fazer("addReceita", {r: {id: uid(), ...campos}});
+});
+$("#dr-apagar").addEventListener("click", e => {
+  const b = e.currentTarget; if (!b.dataset.armed){ b.dataset.armed = "1"; b.textContent = "Confirmar"; return; }
+  $("#dlg-receita").close(); fazer("delReceita", {id: editRec}); toast("Receita apagada.");
+});
+$("#btn-exemplos").addEventListener("click", () => {
+  const novas = RECEITAS_EXEMPLO.filter(x => !S.receitas.some(r => r.id === x.id || chave(r.nome) === chave(x.nome)));
+  novas.forEach(r => fazer("addReceita", {r: {...r}}));
+  toast(novas.length ? `${novas.length} receitas de exemplo repostas.` : "As receitas de exemplo já estão todas lá.");
+});
+
+/* ---------- ementa da semana ---------- */
+const segunda = d => { const x = parse(d); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return iso(x); };
+/* On Sunday, when the week is planned, open the next one. */
+const semanaInicial = () => new Date().getDay() === 0 ? somaDias(segunda(hoje()), 7) : segunda(hoje());
+let semana = semanaInicial();
+const DIAS = ["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+const refeicoesDe = k => { const a = S.familia.almocos; return (a === "todos" || (a === "fds" && k >= 5)) ? ["almoco","jantar"] : ["jantar"]; };
+function renderEmenta(){
+  const fim = somaDias(semana, 6);
+  $("#e-titulo").textContent = `Semana de ${fmt(semana)} a ${fmt(fim)}`;
+  $("#e-dias").innerHTML = DIAS.map((nome, k) => {
+    const data = somaDias(semana, k), e = S.ementa[data] || {}, ehHoje = data === hoje();
+    return `<div class="panel dia" ${ehHoje ? 'style="border-color:var(--accent)"' : ""}><h3>${nome} <span class="muted small">${esc(fmt(data))}${ehHoje ? " · hoje" : ""}</span></h3>
+      ${refeicoesDe(k).map(rf => { const prato = e[rf] || "", r = prato && receitaPorNome(prato), c = r && coberturaReceita(r);
+        return `<div class="refeicao"><span class="small muted">${rf === "almoco" ? "Almoço" : "Jantar"}</span>
+          <div class="grid" style="display:grid;gap:4px"><input list="dl-receitas" data-dia="${data}" data-refeicao="${rf}" value="${esc(prato)}" placeholder="Prato ou receita" aria-label="${nome} ${rf}">
+          ${c ? `<span class="meta"><span class="chip ${c.tem === c.total ? "good" : ""}">tem ${c.tem} de ${c.total}</span>${c.falta.length ? `<span class="small muted">falta: ${esc(c.falta.map(nomeCompra).slice(0, 4).join(", "))}${c.falta.length > 4 ? "…" : ""}</span>` : ""}</span>` : ""}</div></div>`; }).join("")}
+    </div>`;
+  }).join("");
+}
+document.addEventListener("change", e => {
+  const t = e.target; if (!t.dataset?.dia) return;
+  const r = receitaPorNome(t.value.trim());
+  fazer("ementa", {data: t.dataset.dia, refeicao: t.dataset.refeicao, prato: r ? r.nome : t.value.trim()});
+});
+$("#e-ant").addEventListener("click", () => { semana = somaDias(semana, -7); renderEmenta(); });
+$("#e-seg").addEventListener("click", () => { semana = somaDias(semana, 7); renderEmenta(); });
+$("#e-hoje").addEventListener("click", () => { semana = semanaInicial(); renderEmenta(); });
+$("#btn-faltas").addEventListener("click", () => {
+  const ings = [];
+  for (let k = 0; k < 7; k++){ const e = S.ementa[somaDias(semana, k)] || {};
+    for (const prato of Object.values(e)){ const r = receitaPorNome(prato); if (r) ings.push(...coberturaReceita(r).falta); } }
+  const n = porNaLista(ings, "ementa");
+  toast(n ? `${n} ${n === 1 ? "ingrediente" : "ingredientes"} na lista de compras.` : "Não falta nada para as receitas da semana (ou já está na lista).");
+});
+
+/* ---------- Claude: a ready-made request to paste in claude.ai (covered by the subscription), and its answer read back ---------- */
+function pedidoClaude(){
+  const f = S.familia, fim = somaDias(semana, 6), mes = parse(semana).toLocaleDateString("pt-PT", {month: "long"});
+  const linhaP = p => `- ${p.nome} (${["acabou","pouco","tem"][p.nivel]}${p.validade ? `, validade ${fmt(p.validade)}` : ""})`;
+  const tem = S.produtos.filter(p => p.nivel > 0), quase = tem.filter(p => p.validade && dias(hoje(), p.validade) <= 4);
+  const refs = DIAS.map((d, k) => `${d} ${somaDias(semana, k)}: ${refeicoesDe(k).map(r => r === "almoco" ? "almoço" : "jantar").join(" e ")}`).join("\n");
+  return `Ajuda-me a planear as refeições da semana de ${fmt(semana)} a ${fmt(fim)} (${mes}) para a minha família em Vila Nova de Gaia: ${f.pessoas || "2 adultos e 1 criança de 8 anos"}, sem alergias.${f.notas ? `\nNotas: ${f.notas}` : ""}
+Orçamento do supermercado: ${num(f.orcamento) || 360} €/mês; compramos sobretudo no Lidl e na Mercadona, com uma compra grande por semana.
+
+Refeições a planear:
+${refs}
+
+O que temos em casa:
+${tem.map(linhaP).join("\n") || "- (despensa ainda por registar)"}
+${quase.length ? `\nUsar primeiro (validade a acabar):\n${quase.map(linhaP).join("\n")}\n` : ""}
+Receitas que já fazemos: ${S.receitas.map(r => r.nome).join(", ") || "nenhuma registada"}.
+
+Preferências: pratos simples (até 45 min nos dias de semana), legumes da época, aproveitar o que temos e o que está a acabar, poucas compras, e cozinhar a dobrar para sobrar para um almoço ou congelar.
+
+No fim, responde também com um bloco \`\`\`json exatamente assim:
+{"ementa":[{"data":"AAAA-MM-DD","refeicao":"almoco ou jantar","prato":"nome do prato"}],
+ "receitas":[{"nome":"...","tempo":30,"etiquetas":["..."],"ingredientes":["quantidade e ingrediente"],"passos":"..."}],
+ "compras":[{"nome":"...","quantidade":"..."}]}
+Em "receitas" põe só os pratos que não estão na lista das que já fazemos; em "compras" só o que não temos em casa.`;
+}
+let modoClaude = "pedir";
+$("#btn-claude").addEventListener("click", () => {
+  modoClaude = "pedir";
+  $("#dc-titulo").textContent = "Pedir ementa ao Claude";
+  $("#dc-texto").textContent = "Este pedido leva a despensa, as validades, as receitas e os gostos da família. Copie, cole numa conversa nova do Claude e, quando ele responder, volte aqui e use \"Colar a resposta\".";
+  $("#dc-area").value = pedidoClaude(); $("#dc-area").readOnly = true; $("#dc-ok").textContent = "Copiar e abrir o Claude";
+  $("#dlg-claude").showModal();
+});
+$("#btn-colar").addEventListener("click", () => {
+  modoClaude = "colar";
+  $("#dc-titulo").textContent = "Colar a resposta do Claude";
+  $("#dc-texto").textContent = "Cole aqui a resposta inteira (ou só o bloco json). A ementa, as receitas novas e as compras entram sozinhas.";
+  $("#dc-area").value = ""; $("#dc-area").readOnly = false; $("#dc-ok").textContent = "Usar esta resposta";
+  $("#dlg-claude").showModal(); $("#dc-area").focus();
+});
+$("#dc-fechar").addEventListener("click", () => $("#dlg-claude").close());
+$("#dc-ok").addEventListener("click", async () => {
+  if (modoClaude === "pedir"){
+    try { await navigator.clipboard.writeText($("#dc-area").value); toast("Pedido copiado. Cole-o no Claude."); }
+    catch { $("#dc-area").select(); toast("Selecione o texto e copie-o."); return; }
+    window.open("https://claude.ai/new", "_blank", "noopener"); $("#dlg-claude").close(); return;
+  }
+  const r = lerResposta($("#dc-area").value);
+  if (!r){ toast("Não encontrei o bloco json na resposta. Cole-a inteira."); return; }
+  $("#dlg-claude").close();
+  toast(`Ementa: ${r.ementa} refeições · ${r.receitas} receitas novas · ${r.compras} compras na lista.`);
+  showTab("ementa");
+});
+function lerResposta(txt){
+  const m = txt.match(/```json\s*([\s\S]*?)```/i) || txt.match(/(\{[\s\S]*\})/);
+  let j; try { j = JSON.parse(m ? m[1] : txt); } catch { return null; }
+  if (!j || typeof j !== "object") return null;
+  let ementa = 0, receitas = 0;
+  for (const r of Array.isArray(j.receitas) ? j.receitas : []){
+    if (!r?.nome || S.receitas.some(x => chave(x.nome) === chave(r.nome))) continue;
+    fazer("addReceita", {r: {id: uid(), nome: String(r.nome), tempo: num(r.tempo), etiquetas: (r.etiquetas || []).map(String), ingredientes: (r.ingredientes || []).map(String), passos: String(r.passos || ""), origem: "claude"}}); receitas++;
+  }
+  for (const e of Array.isArray(j.ementa) ? j.ementa : []){
+    if (!/^\d{4}-\d\d-\d\d$/.test(e?.data || "") || !e.prato) continue;
+    const rf = /almo/i.test(e.refeicao) ? "almoco" : "jantar", r = receitaPorNome(e.prato);
+    fazer("ementa", {data: e.data, refeicao: rf, prato: r ? r.nome : String(e.prato)}); ementa++;
+    if (e.data < semana || e.data > somaDias(semana, 6)) semana = segunda(e.data);
+  }
+  const ja = new Set(S.lista.filter(i => !i.feito).map(i => chave(i.nome))); let compras = 0;
+  for (const c of Array.isArray(j.compras) ? j.compras : []){
+    const nome = String(c?.nome || "").trim(); if (!nome || ja.has(chave(nome)) || emCasa(nome)) continue; ja.add(chave(nome));
+    fazer("addItem", {it: {id: uid(), nome, qtd: String(c.quantidade || ""), seccao: seccaoDe(nome), feito: false, origem: "claude"}}); compras++;
+  }
+  return {ementa, receitas, compras};
+}
+
+/* ---------- família e definições ---------- */
+function renderFamilia(){
+  if ($("#f-familia").contains(document.activeElement)) return;
+  const f = S.familia; $("#fa-pessoas").value = f.pessoas || ""; $("#fa-orc").value = f.orcamento || ""; $("#fa-almocos").value = f.almocos || "fds"; $("#fa-notas").value = f.notas || "";
+}
+$("#f-familia").addEventListener("submit", e => {
+  e.preventDefault();
+  fazer("familia", {campos: {pessoas: $("#fa-pessoas").value.trim(), orcamento: num($("#fa-orc").value), almocos: $("#fa-almocos").value, notas: $("#fa-notas").value.trim()}});
+  document.activeElement?.blur(); toast("Guardado.");
+});
+function renderCfg(){
+  $("#cfg-repo").value = cfg.repo || ""; $("#cfg-token").value = cfg.token || "";
+  const emprestado = !cfg.token && ls.get("descomplica-cfg")?.token;
+  $("#cfg-estado").innerHTML = !online() ? "Os dados estão <strong>só neste navegador</strong>. Ligue ao GitHub para os partilhar entre os vossos telemóveis."
+    : `Os dados estão no repositório privado <strong>${esc(cfg.repo)}</strong>${emprestado ? ", com o token do Descomplica deste navegador" : ""}. Cada alteração fica guardada como um commit.`;
+  $("#btn-desligar").hidden = !cfg.token;
+}
+$("#f-cfg").addEventListener("submit", async e => {
+  e.preventDefault();
+  cfg = {repo: $("#cfg-repo").value.trim().replace(/^https:\/\/github\.com\//, "").replace(/\/$/, "") || DEFAULT_REPO, token: $("#cfg-token").value.trim()};
+  ls.set("cozinha-cfg", cfg); renderCfg(); await reload();
+});
+$("#btn-desligar").addEventListener("click", () => { cfg = {repo: cfg.repo, token: ""}; ls.set("cozinha-cfg", cfg); renderCfg(); estado(); toast("Token apagado deste navegador."); });
+function baixar(blob, nome){ const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nome; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); }
+$("#btn-backup").addEventListener("click", () => baixar(new Blob([JSON.stringify(S, null, 1)], {type: "application/json"}), `cozinha-${hoje()}.json`));
+
+function renderAll(){ renderDespensa(); renderLista(); renderReceitas(); renderEmenta(); renderFamilia(); }
+
+/* ---------- start ---------- */
+$("#today").textContent = new Date().toLocaleDateString("pt-PT", {weekday:"long", day:"numeric", month:"long"});
+S = completo(ls.get("cozinha-cache") || {});
+if (!online() && !ls.get("cozinha-cache")){ S.receitas = RECEITAS_EXEMPLO.map(r => ({...r})); ls.set("cozinha-cache", S); }
+const pedido = new URLSearchParams(location.search).get("tab");
+if (pedido) history.replaceState(null, "", location.pathname);
+showTab(pedido && $(`#tab-${pedido}`) ? pedido : ls.get("cozinha-tab") || "despensa");
+renderCfg(); renderAll(); estado(); reload(); carregarHorta();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+setInterval(renderAll, 10 * 60e3);
+</script>
+</body>
+</html>
