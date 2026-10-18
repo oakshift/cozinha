@@ -199,10 +199,8 @@ code{font-size:.85em;background:var(--surface-2);border:1px solid var(--line);bo
       <button class="btn" id="btn-claude">Pedir ementa ao Claude</button>
       <button class="btn" id="btn-colar">Colar a resposta</button>
     </div>
-    <div class="panel"><div class="fields">
-      <label class="fl">Ao almoço, esta semana (pessoas)<input id="e-p-almoco" type="number" min="0" max="20" step="1" inputmode="numeric"></label>
-      <label class="fl">Ao jantar, esta semana (pessoas)<input id="e-p-jantar" type="number" min="0" max="20" step="1" inputmode="numeric"></label>
-    </div><p class="muted small" style="margin-top:8px">Um almoço que comece por "Sobras" é feito no jantar da véspera: a app soma essas doses ao jantar.</p></div>
+    <p class="small" id="e-pessoas"></p>
+    <p class="muted small">Um almoço que comece por "Sobras" é feito no jantar da véspera: a app soma essas doses ao jantar. Quem come em cada dia ajusta-se em Definições.</p>
     <p class="muted small">Escreva o prato ou escolha uma receita. As receitas mostram quantos ingredientes já tem em casa.</p>
     <datalist id="dl-receitas"></datalist>
     <div id="e-dias" class="block"></div>
@@ -233,8 +231,16 @@ code{font-size:.85em;background:var(--surface-2);border:1px solid var(--line);bo
         <div class="fields">
           <label class="fl">Pessoas<input id="fa-pessoas" placeholder="2 adultos e 1 criança"></label>
           <label class="fl">Orçamento do supermercado (€/mês)<input id="fa-orc" type="number" min="0" step="10" inputmode="numeric"></label>
-          <label class="fl">Ao almoço, normalmente<input id="fa-p-almoco" type="number" min="0" step="1" inputmode="numeric"></label>
-          <label class="fl">Ao jantar, normalmente<input id="fa-p-jantar" type="number" min="0" step="1" inputmode="numeric"></label>
+          <label class="fl">Almoço nos dias úteis (pessoas)<input id="fa-p-almoco" type="number" min="0" step="1" inputmode="numeric"></label>
+          <label class="fl">Jantar e fim de semana (pessoas)<input id="fa-p-jantar" type="number" min="0" step="1" inputmode="numeric"></label>
+        </div>
+        <div class="fields">
+          <label class="fl">Vêm em semanas alternadas<input id="fa-x-nome" placeholder="Ex.: filhos da Liliana"></label>
+          <label class="fl">Quantos<input id="fa-x-pessoas" type="number" min="0" step="1" inputmode="numeric"></label>
+          <label class="fl">Chegam no dia (e saem 7 dias depois)<input id="fa-x-chegada" type="date"></label>
+          <label class="fl">Repete<select id="fa-x-ciclo"><option value="14">Semana sim, semana não</option><option value="0">Não repete</option></select></label>
+        </div>
+        <div class="fields">
           <label class="fl">Almoços a planear<select id="fa-almocos"><option value="fds">Só ao fim de semana</option><option value="todos">Todos os dias</option><option value="nenhum">Nenhum</option></select></label>
         </div>
         <label class="fl">Gostos e notas (para as sugestões)<textarea id="fa-notas" placeholder="Ex.: o Pedro não gosta de… · jantares rápidos nos dias de escola · comprar no Lidl e na Mercadona"></textarea></label>
@@ -371,9 +377,10 @@ const RECEITAS_EXEMPLO = [
   {id:"x-pimentos-recheados", nome:"Pimentos recheados", tempo:50, etiquetas:["horta","forno"], ingredientes:["4 pimentos","150 g de arroz","300 g de carne picada","1 cebola","1 tomate","queijo ralado","azeite","sal"], passos:"Cozer o arroz. Refogar cebola, carne e tomate e misturar com o arroz. Rechear os pimentos sem sementes, queijo por cima. Forno a 190 °C, 30 min."}
 ];
 
-/* semanas: {"2026-10-26": {almoco: 2, jantar: 5}} — who eats each meal that week; otherwise familia.almocoPessoas / jantarPessoas. */
-const vazio = () => ({produtos:[], lista:[], receitas:[], ementa:{}, semanas:{}, familia:{pessoas:"", orcamento:0, almocos:"fds", notas:"", almocoPessoas:2, jantarPessoas:3}});
-const completo = d => { const v = vazio(); return {...v, ...d, semanas: {...(d.semanas || {})}, familia: {...v.familia, ...(d.familia || {})}}; };
+/* Who eats: almocoPessoas on weekday lunches, jantarPessoas at dinner and weekend lunches, plus familia.extra
+   ({pessoas, chegada: a Friday, ciclo: 14}) during the 7 days from each arrival: they dine on the day they arrive, not on the day they leave. */
+const vazio = () => ({produtos:[], lista:[], receitas:[], ementa:{}, familia:{pessoas:"", orcamento:0, almocos:"fds", notas:"", almocoPessoas:2, jantarPessoas:3, extra:{pessoas:0, chegada:"", ciclo:14, nome:""}}});
+const completo = d => { const v = vazio(); return {...v, ...d, familia: {...v.familia, ...(d.familia || {}), extra: {...v.familia.extra, ...(d.familia?.extra || {})}}}; };
 let S = vazio();
 
 const $ = (s, r=document) => r.querySelector(s);
@@ -491,12 +498,11 @@ const OPS = {
   editReceita(d, {id, campos}){ const x = d.receitas.find(y => y.id === id); if (x) Object.assign(x, campos); },
   delReceita(d, {id}){ d.receitas = d.receitas.filter(x => x.id !== id); },
   ementa(d, {data, refeicao, prato}){ const e = d.ementa[data] ||= {}; if (prato) e[refeicao] = prato; else { delete e[refeicao]; if (!Object.keys(e).length) delete d.ementa[data]; } },
-  familia(d, {campos}){ d.familia = {...d.familia, ...campos}; },
-  semana(d, {seg, campos}){ d.semanas ||= {}; d.semanas[seg] = {...(d.semanas[seg] || {}), ...campos}; }
+  familia(d, {campos}){ d.familia = {...d.familia, ...campos}; }
 };
 const MSG = {addProduto: a => `Despensa: ${a.p.nome}`, editProduto: () => "Despensa: editar", delProduto: () => "Despensa: apagar", nivel: a => `Despensa: ${["acabou","pouco","tenho"][a.nivel]}`,
   addItem: a => `Lista: ${a.it.nome}`, marcar: () => "Lista: marcar", delItem: () => "Lista: tirar", arrumar: a => `Lista: arrumar ${a.ids.length}`,
-  addReceita: a => `Receita: ${a.r.nome}`, editReceita: () => "Receita: editar", delReceita: () => "Receita: apagar", ementa: a => `Ementa ${a.data}`, familia: () => "Família", semana: a => `Pessoas na semana de ${a.seg}`};
+  addReceita: a => `Receita: ${a.r.nome}`, editReceita: () => "Receita: editar", delReceita: () => "Receita: apagar", ementa: a => `Ementa ${a.data}`, familia: () => "Família"};
 function aplicar(d, o){
   const f = d._feitos ||= []; if (f.includes(o.id)) return;
   OPS[o.op](d, o.args); f.push(o.id); if (f.length > 500) f.splice(0, f.length - 500);
@@ -751,7 +757,16 @@ const segunda = d => { const x = parse(d); x.setDate(x.getDate() - (x.getDay() +
 const semanaInicial = () => new Date().getDay() === 0 ? somaDias(segunda(hoje()), 7) : segunda(hoje());
 let semana = semanaInicial();
 const DIAS = ["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
-const pessoas = (data, rf) => { const s = S.semanas?.[segunda(data)]?.[rf]; return s != null ? num(s) : num(rf === "almoco" ? S.familia.almocoPessoas : S.familia.jantarPessoas) || (rf === "almoco" ? 2 : 3); };
+function comExtra(data){
+  const x = S.familia.extra; if (!x?.chegada || !num(x.pessoas)) return false;
+  const d = dias(x.chegada, data); if (d < 0) return false;
+  return (num(x.ciclo) ? d % num(x.ciclo) : d) < 7;
+}
+function pessoas(data, rf){
+  const f = S.familia, dow = parse(data).getDay(), util = dow > 0 && dow < 6;
+  if (rf === "almoco" && util) return num(f.almocoPessoas) || 2;
+  return (num(f.jantarPessoas) || 3) + (comExtra(data) ? num(f.extra.pessoas) : 0);
+}
 const ehSobras = prato => /^\s*sobras/i.test(prato || "");
 /* Portions to cook: the people at that meal, plus next day's lunch when it is leftovers. */
 function doses(data, rf){
@@ -764,11 +779,12 @@ const refeicoesDe = k => { const a = S.familia.almocos; return (a === "todos" ||
 function renderEmenta(){
   const fim = somaDias(semana, 6);
   $("#e-titulo").textContent = `Semana de ${fmt(semana)} a ${fmt(fim)}`;
-  if (document.activeElement !== $("#e-p-almoco")) $("#e-p-almoco").value = pessoas(semana, "almoco");
-  if (document.activeElement !== $("#e-p-jantar")) $("#e-p-jantar").value = pessoas(semana, "jantar");
+  const jantares = DIAS.map((_, k) => pessoas(somaDias(semana, k), "jantar")), mud = jantares.findIndex(n => n !== jantares[0]);
+  $("#e-pessoas").innerHTML = `Ao almoço nos dias úteis: <strong>${pessoas(semana, "almoco")}</strong>. Ao jantar: <strong>${jantares[0]}</strong>` +
+    (mud > 0 ? `, e <strong>${jantares[mud]}</strong> a partir de ${DIAS[mud].toLowerCase()}${S.familia.extra?.nome ? ` (${jantares[mud] > jantares[0] ? "chegam" : "saem"} os ${esc(S.familia.extra.nome)})` : ""}.` : ".");
   $("#e-dias").innerHTML = DIAS.map((nome, k) => {
     const data = somaDias(semana, k), e = S.ementa[data] || {}, ehHoje = data === hoje();
-    return `<div class="panel dia" ${ehHoje ? 'style="border-color:var(--accent)"' : ""}><h3>${nome} <span class="muted small">${esc(fmt(data))}${ehHoje ? " · hoje" : ""}</span></h3>
+    return `<div class="panel dia" ${ehHoje ? 'style="border-color:var(--accent)"' : ""}><h3>${nome} <span class="muted small">${esc(fmt(data))}${ehHoje ? " · hoje" : ""} · ${pessoas(data, "jantar")} ao jantar</span></h3>
       ${refeicoesDe(k).map(rf => { const prato = e[rf] || "", r = prato && receitaPorNome(prato), c = r && coberturaReceita(r), n = doses(data, rf);
         const dosesTxt = !prato ? `${pessoas(data, rf)} pessoas` : ehSobras(prato) ? "sobras de ontem" : `cozinhar ${n} doses${r ? ` · receita para ${num(r.porcoes) || 4}${fator(n, r.porcoes) ? ` → ${fator(n, r.porcoes)}` : ""}` : ""}`;
         return `<div class="refeicao"><span class="small muted">${rf === "almoco" ? "Almoço" : "Jantar"}</span>
@@ -782,8 +798,6 @@ document.addEventListener("change", e => {
   const r = receitaPorNome(t.value.trim());
   fazer("ementa", {data: t.dataset.dia, refeicao: t.dataset.refeicao, prato: r ? r.nome : t.value.trim()});
 });
-$("#e-p-almoco").addEventListener("change", e => fazer("semana", {seg: semana, campos: {almoco: Math.max(0, Math.round(num(e.target.value)))}}));
-$("#e-p-jantar").addEventListener("change", e => fazer("semana", {seg: semana, campos: {jantar: Math.max(0, Math.round(num(e.target.value)))}}));
 $("#e-ant").addEventListener("click", () => { semana = somaDias(semana, -7); renderEmenta(); });
 $("#e-seg").addEventListener("click", () => { semana = somaDias(semana, 7); renderEmenta(); });
 $("#e-hoje").addEventListener("click", () => { semana = semanaInicial(); renderEmenta(); });
@@ -875,10 +889,12 @@ function lerResposta(txt){
 function renderFamilia(){
   if ($("#f-familia").contains(document.activeElement)) return;
   const f = S.familia; $("#fa-pessoas").value = f.pessoas || ""; $("#fa-orc").value = f.orcamento || ""; $("#fa-almocos").value = f.almocos || "fds"; $("#fa-notas").value = f.notas || ""; $("#fa-p-almoco").value = f.almocoPessoas ?? 2; $("#fa-p-jantar").value = f.jantarPessoas ?? 3;
+  $("#fa-x-nome").value = f.extra?.nome || ""; $("#fa-x-pessoas").value = f.extra?.pessoas || ""; $("#fa-x-chegada").value = f.extra?.chegada || ""; $("#fa-x-ciclo").value = String(f.extra?.ciclo ?? 14);
 }
 $("#f-familia").addEventListener("submit", e => {
   e.preventDefault();
-  fazer("familia", {campos: {pessoas: $("#fa-pessoas").value.trim(), orcamento: num($("#fa-orc").value), almocos: $("#fa-almocos").value, notas: $("#fa-notas").value.trim(), almocoPessoas: num($("#fa-p-almoco").value), jantarPessoas: num($("#fa-p-jantar").value)}});
+  fazer("familia", {campos: {pessoas: $("#fa-pessoas").value.trim(), orcamento: num($("#fa-orc").value), almocos: $("#fa-almocos").value, notas: $("#fa-notas").value.trim(), almocoPessoas: num($("#fa-p-almoco").value), jantarPessoas: num($("#fa-p-jantar").value),
+    extra: {nome: $("#fa-x-nome").value.trim(), pessoas: num($("#fa-x-pessoas").value), chegada: $("#fa-x-chegada").value, ciclo: num($("#fa-x-ciclo").value)}}});
   document.activeElement?.blur(); toast("Guardado.");
 });
 function renderCfg(){
